@@ -46,7 +46,7 @@ def sum_view(request):
    """Read query parameters n1 and n2 from GET request, convert them into a sum, and return JSON."""
    n1 = float(request.GET.get("n1"))
    n2 = float(request.GET.get("n2"))
-   return JsonResponse({"sum": n1+n2})
+   return HttpResponse({"sum": n1+n2})
 
 # ---------------------------------------------------------------------------
 # HW4  — user creation
