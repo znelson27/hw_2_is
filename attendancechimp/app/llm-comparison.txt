@@ -1,0 +1,12 @@
+Comparing my model to the LLM-generated one: which is simpler, more complete, or easier to implement?
+
+My model is a lot simpler than Claude's, at least to build and quickly understand each
+table's purpose, but I like how Claude's model takes into account ways to prevent cheating 
+on attendance such as generating unique (non-sequential) QR codes so that a student cannot guess the 
+code for a lecture they did not attend, or including an opens at/closes at field for lectures to flag
+suspicious QR upload times. I also think Claude did a better job of understanding that Student 
+and Instructor are both supposed to be linked to a User table, which I did not quite get. It
+also makes better use of docstrings and API functions. I like the hashing of the QR code as well. 
+At the same time, Claude's model requires a lot more detailed input, which might make it more
+difficult for busy instructors to implement (for example when they have to enter details such as
+an upload window for the QR.
