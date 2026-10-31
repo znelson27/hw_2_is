@@ -34,16 +34,18 @@ logger = logging.getLogger(__name__) # set up tracking, auditing, and debugging
 
 class StudentProfile(models.Model):
    """ 
-   Record of students, including unique ID and first/last name.
+   Record of students, including unique ID and first/last name. Auth using Django's User model.
    """
+   user = models.OneToOneField(User, on_delete=models.CASCADE)
    student_id = models.CharField(max_length=8, primary_key=True)
    first_name = models.CharField(max_length=30)
    last_name = models.CharField(max_length=30)
 
 class InstructorProfile(models.Model):
    """
-   Record of instructors, including unique ID and first/last name. 
+   Record of instructors, including unique ID and first/last name. Auth using Django's User model.
    """
+   user = models.OneToOneField(User, on_delete=models.CASCADE)
    instructor_id = models.CharField(max_length=8, primary_key=True)
    first_name = models.CharField(max_length=30)
    last_name = models.CharField(max_length=30)
@@ -94,7 +96,9 @@ class QRCodeUpload(models.Model):
    Record of QR codes uploaded, including student and (optionally) lecture.
    """
    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
-   lecture = models.OneToOneField(Lecture, on_delete=models.PROTECT)
+   lecture = models.ForeignKey(Lecture, on_delete=models.SET_NULL, null=True)
+   image = models.ImageField(upload_to="qr_code_uploads/%Y/%m/%d/")
+   uploaded_at = models.DateTimeField(auto_now_add=True) # timestamp to verify upload durng lecture
 
 
 # ---------------------------------------------------------------------------

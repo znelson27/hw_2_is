@@ -27,19 +27,32 @@ CDT = zoneinfo.ZoneInfo("America/Chicago")
 # HW2  — index, time, sum
 # ---------------------------------------------------------------------------
 
-def index(request):
-    """Render the home page (index.html)."""
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from django.http import HttpResponse, JsonResponse
 
-    context = {}
-    return render(request, 'app/index.html', context)
+def time_view(request):
+    """Return the current Central time formatted as 'HH:MM'in plain text."""
+    now = datetime.now(ZoneInfo("America/Chicago"))
+    return HttpResponse(now.strftime("%H:%M"), content_type="text/plain")
 
+def sum_view(request):
+   """Read query parameters n1 and n2 from GET request, convert them into a sum, and return JSON."""
+   n1 = float(request.GET.get("n1"))
+   n2 = float(request.GET.get("n2"))
+   sum_string = n1+n2
+   return HttpResponse(f"<p>{sum_string}<p>")
 
 
 # ---------------------------------------------------------------------------
 # HW4  — user creation
 # ---------------------------------------------------------------------------
 
-
+def index(request):
+    """Render the home page (index.html)."""
+    now = datetime.now(ZoneInfo("America/Chicago"))
+    context = {'current_time':now.strftime("%H:%M"),'username':request.user.username}
+    return render(request, 'app/index.html', context)
 
 # ---------------------------------------------------------------------------
 # HW5  — courses, lectures, QR uploads, dump
