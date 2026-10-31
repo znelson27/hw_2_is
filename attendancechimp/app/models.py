@@ -61,7 +61,7 @@ class CourseProfile(models.Model):
    Also creates many-to-many (junction) table "enrollment" linking students to courses.
    """
    course_id = models.CharField(max_length=4, primary_key=True)
-   name = models.CharField()
+   name = models.CharField(max_length=100)
    instructor = models.ForeignKey(InstructorProfile, on_delete=models.CASCADE)
    meeting_sched = models.DateTimeField()
    enrollment = models.ManyToManyField(StudentProfile)
