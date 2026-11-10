@@ -61,10 +61,16 @@ class CourseProfile(models.Model):
    Also creates many-to-many (junction) table "enrollment" linking students to courses.
    """
    course_id = models.CharField(max_length=4, primary_key=True)
-   name = models.CharField(max_length=100)
+   name = models.CharField(max_length=100,unique=True)
    instructor = models.ForeignKey(InstructorProfile, on_delete=models.CASCADE)
-   meeting_sched = models.DateTimeField()
    enrollment = models.ManyToManyField(StudentProfile)
+   start_time = models.TimeField()
+   end_time = models.TimeField()
+   day_mon = models.BooleanField(default=False)
+   day_tue = models.BooleanField(default=False)
+   day_wed = models.BooleanField(default=False)
+   day_thu = models.BooleanField(default=False)
+   day_fri = models.BooleanField(default=False)
 
 # ---------------------------------------------------------------------------
 # Enrollment
@@ -83,7 +89,7 @@ class Lecture(models.Model):
    """
    lecture_id = models.CharField(max_length=4, primary_key=True)
    course = models.ForeignKey(CourseProfile, on_delete=models.CASCADE)
-   date = models.DateField()
+   date = models.DateField(auto_now_add=True)
    qr_code = models.CharField(max_length=10)
 
 

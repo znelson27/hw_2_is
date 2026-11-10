@@ -1,0 +1,7 @@
+<form action="/app/createQRCodeUpload" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="file" name="imageUpload">
+  <button type="submit">Upload QR Code</button>
+</form>
+
+
