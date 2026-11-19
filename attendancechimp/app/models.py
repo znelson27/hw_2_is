@@ -18,6 +18,7 @@ Entities
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 import logging
 import string
@@ -50,6 +51,11 @@ class InstructorProfile(models.Model):
    first_name = models.CharField(max_length=30)
    last_name = models.CharField(max_length=30)
 
+def is_instructor(user):
+    return user.is_authenticated and InstructorProfile.objects.filter(user=user).exists()
+
+def is_student(user):
+    return user.is_authenticated and StudentProfile.objects.filter(user=user).exists()
 
 # ---------------------------------------------------------------------------
 # Course
@@ -71,6 +77,13 @@ class CourseProfile(models.Model):
    day_wed = models.BooleanField(default=False)
    day_thu = models.BooleanField(default=False)
    day_fri = models.BooleanField(default=False)
+
+   # need function which encapsulates all boolean fields
+   def meets_on_day(self, weekday): # course, day
+    days = [self.day_mon, self.day_tue, self.day_wed, self.day_thu, self.day_fri] #list boolean vals
+    return weekday < 5 and days[weekday] # no classes on sat/sun, but must handle uploads
+    # will return false for weekends, and if true, will index weekday from days and return true/false
+    # for that course.
 
 # ---------------------------------------------------------------------------
 # Enrollment
@@ -111,5 +124,16 @@ class QRCodeUpload(models.Model):
 # Helper / API functions
 # ---------------------------------------------------------------------------
 
+def getUploadsForCourse(course):
+   """
+   Input= unique course code. Output= List of QRCodeUpload objects valid for that course.
+   """
+   
+   valid_codes = [] # will append qr codes to this
 
-
+   # fk chain: lecture.course must exist
+   for lecture in Lecture.objects.filter(course=course): # all lectues belonging to course we called
+      for upload in QRCodeUploads.objects.filter(lecture=lecture): # nested loop- codes for filt lec
+         upload_time = timezone.localtime(upload.uploaded_at) # attribute from uploads table
+         if course.meets_on_day(.weekday()) and course.start_time <= upload_time.time() <= course.end_time:
+            valid_codes.append(upload)

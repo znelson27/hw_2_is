@@ -16,10 +16,10 @@ import zoneinfo
 import json
 import io
 import random, string
+from django.utils import timezone
 
-from .models import (InstructorProfile, StudentProfile, CourseProfile, Lecture, QRCodeUpload)
-#                    is_instructor, is_student,
-#                    getUploadsForCourse
+from .models import (InstructorProfile, StudentProfile, CourseProfile, Lecture, QRCodeUpload,
+                    is_instructor, is_student, getUploadsForCourse)
 
 CDT = zoneinfo.ZoneInfo("America/Chicago")
 
@@ -70,9 +70,9 @@ def createUser(request):
    email = request.POST.get('email')
    user_name = request.POST.get('user_name')
    password = request.POST.get('password')
-   is_student = request.POST.get('is_student')
+   is_student_auth = request.POST.get('is_student')
 
-   student = (is_student == 'true' or is_student == '1') # else does not know which profile to create
+   student = (is_student_auth == 'true' or is_student_auth == '1') # else does not know whichto create
 
    if User.objects.filter(email=email).exists():
       return HttpResponseBadRequest("Email already taken")
@@ -111,9 +111,8 @@ def new_qr_upload(request):
 @require_POST
 def createCourse(request):
    """ Creates and saves course. Instructor gets HTTP 200; all others get 401."""
-   instructor = request.user.is_authenticated and InstructorProfile.objects.filter(user=request.user).exists()
 
-   if instructor:
+   if is_instructor(request.user):
       class_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
       CourseProfile.objects.create( 
          course_id=class_id, # need unique course id
@@ -136,9 +135,8 @@ def createCourse(request):
 @require_POST
 def createLecture(request):
    """ Creates and saves lecture. Instructor gets HTTP 200; all others get 401. Linked to Course."""
-   instructor = request.user.is_authenticated and InstructorProfile.objects.filter(user=request.user).exists()
 
-   if instructor:
+   if is_instructor(request.user):
       try:
          course = CourseProfile.objects.get(name=request.POST.get('choice'))
       except CourseProfile.DoesNotExist:
@@ -160,9 +158,8 @@ def createLecture(request):
 @require_POST
 def createQRCodeUpload(request):
    """ Creates and saves QR code upload. Must be student, else 401."""
-   student = request.user.is_authenticated and StudentProfile.objects.filter(user=request.user).exists()
 
-   if student:
+   if is_student(request.user):
       imageUpload = request.FILES.get('imageUpload')
       if imageUpload is None:
          return HttpResponseBadRequest("No file uploaded") # account for possible errors
@@ -180,9 +177,8 @@ def createQRCodeUpload(request):
 @require_GET
 def dumpUploads(request):
    """ Accepts GET requests, returns a JSON list with usernames/upload-times. Must be instructor. """
-   instructor = request.user.is_authenticated and InstructorProfile.objects.filter(user=request.user).exists()
    
-   if instructor:
+   if is_instructor(request.user):
       upload_list=[]
       for upload in QRCodeUpload.objects.all():
          upload_list.append({"username": upload.student.user.username, # "student" field in qr table
@@ -196,5 +192,28 @@ def dumpUploads(request):
 # HW6  — getUploads
 # ---------------------------------------------------------------------------
 
+@require_GET
+def getUploads(request):
+   """ 
+   Reads course parameter, calls getUploads, returns JSON list. Instructors only.
+   """
+   if is_instructor(request.user):
+      course_name = request.GET.get('course') # get course parameter from GET request
+      if 'course' not in request.GET:
+         return JsonResponse({"error": "Missing course parameter"}, status=400)
 
+      try:
+         course = CourseProfile.objects.get(name=course_name) # model contains course queried
+      except CourseProfile.DoesNotExist:
+         return JsonResponse([], safe=False) # empty list
 
+      results = [] # want to return a list
+      for upload in getUploadsForCourse(course): # from models.py
+         results.append({       # return username and upload_time (time as strings)
+            "username": upload.student.user.username, # username built into django auth
+            "upload_time": timezone.localtime(upload.uploaded_at).strftime("%Y-%m-%d %H:%M:%S")
+         })
+      return JsonResponse(results, safe=False) #list 
+
+   else: # if not instructor or not authenticated
+      return HttpResponse("Only instructors can view uploads.", status=401)

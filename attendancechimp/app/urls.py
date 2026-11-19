@@ -15,4 +15,5 @@ urlpatterns = [
     path('new_qr_upload', views.new_qr_upload, name='new_qr_upload'),
     path('createQRCodeUpload', views.createQRCodeUpload, name='create_qr_upload'),
     path('dumpUploads', views.dumpUploads, name='dump_uploads'),
+    path('getUploads', views.getUploads, name='get_uploads'),
 ]
