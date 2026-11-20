@@ -202,13 +202,8 @@ def getUploads(request):
       if 'course' not in request.GET:
          return JsonResponse({"error": "Missing course parameter"}, status=400)
 
-      try:
-         course = Course.objects.get(name=course_name) # model contains course queried
-      except Course.DoesNotExist:
-         return JsonResponse([], safe=False) # empty list
-
       results = [] # want to return a list
-      for upload in getUploadsForCourse(course): # from models.py
+      for upload in getUploadsForCourse(course_code): # from models.py
          results.append({       # return username and upload_time (time as strings)
             "username": upload.student.user.username, # username built into django auth
             "upload_time": timezone.localtime(upload.uploaded_at).strftime("%Y-%m-%d %H:%M:%S")
