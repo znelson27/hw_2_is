@@ -198,7 +198,7 @@ def getUploads(request):
    Reads course parameter, calls getUploads, returns JSON list. Instructors only.
    """
    if is_instructor(request.user):
-      course_name = request.GET.get('course') # get course parameter from GET request
+      course_code = request.GET.get('course') # get course parameter from GET request
       if 'course' not in request.GET:
          return JsonResponse({"error": "Missing course parameter"}, status=400)
 
