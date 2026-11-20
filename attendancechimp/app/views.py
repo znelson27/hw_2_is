@@ -18,7 +18,7 @@ import io
 import random, string
 from django.utils import timezone
 
-from .models import (InstructorProfile, StudentProfile, CourseProfile, Lecture, QRCodeUpload,
+from .models import (InstructorProfile, StudentProfile, Course, Lecture, QRCodeUpload,
                     is_instructor, is_student, getUploadsForCourse)
 
 CDT = zoneinfo.ZoneInfo("America/Chicago")
@@ -114,7 +114,7 @@ def createCourse(request):
 
    if is_instructor(request.user):
       class_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
-      CourseProfile.objects.create( 
+      Course.objects.create( 
          course_id=class_id, # need unique course id
          name=request.POST.get('course-name'),
          instructor=request.user.instructorprofile,
@@ -138,8 +138,8 @@ def createLecture(request):
 
    if is_instructor(request.user):
       try:
-         course = CourseProfile.objects.get(name=request.POST.get('choice'))
-      except CourseProfile.DoesNotExist:
+         course = Course.objects.get(name=request.POST.get('choice'))
+      except Course.DoesNotExist:
          return HttpResponseBadRequest("No such course") # must be linked to a course
 
       lect_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
@@ -203,8 +203,8 @@ def getUploads(request):
          return JsonResponse({"error": "Missing course parameter"}, status=400)
 
       try:
-         course = CourseProfile.objects.get(name=course_name) # model contains course queried
-      except CourseProfile.DoesNotExist:
+         course = Course.objects.get(name=course_name) # model contains course queried
+      except Course.DoesNotExist:
          return JsonResponse([], safe=False) # empty list
 
       results = [] # want to return a list

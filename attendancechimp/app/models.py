@@ -61,7 +61,7 @@ def is_student(user):
 # Course
 # ---------------------------------------------------------------------------
 
-class CourseProfile(models.Model):
+class Course(models.Model):
    """ 
    Record of courses, including unique ID, name, instructor, meeting schedule.
    Also creates many-to-many (junction) table "enrollment" linking students to courses.
@@ -101,7 +101,7 @@ class Lecture(models.Model):
    Record of lectures, including unique ID, course, date, and QR code identifier.
    """
    lecture_id = models.CharField(max_length=4, primary_key=True)
-   course = models.ForeignKey(CourseProfile, on_delete=models.CASCADE)
+   course = models.ForeignKey(Course, on_delete=models.CASCADE)
    date = models.DateField(auto_now_add=True)
    qr_code = models.CharField(max_length=10)
 
