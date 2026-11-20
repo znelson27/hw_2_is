@@ -129,19 +129,20 @@ def getUploadsForCourse(course):
    Input= unique course code. Output= List of QRCodeUpload objects valid for that course.
    """
 
-   course_code=Course.objects.filter(name=course_code).first()
-   if course_code is None:
-      course_code = Course.objects.filter(course_id=course_code).first() # try both
-   if course_code is None:
+   course_name=Course.objects.filter(name=course_code).first()
+   if course_name is None:
+      course_name = Course.objects.filter(course_id=course).first() # try both
+   if course_name is None:
       return []  # course does not exist
    
    valid_codes = [] # will append qr codes to this
 
    # fk chain: lecture.course must exist
-   for lecture in Lecture.objects.filter(course=course_code): # all lectues belonging to course we called
+
+   for lecture in Lecture.objects.filter(course=course_name): # all lectues belonging to course we called
       for upload in QRCodeUpload.objects.filter(lecture=lecture): # nested loop- codes for filt lec
          upload_time = timezone.localtime(upload.uploaded_at) # attribute from uploads table
-         if (course_code.meets_on_day(upload_time.weekday()) and 
-             course_code.start_time <= upload_time.time() <= course_code.end_time):
+         if (course_name.meets_on_day(upload_time.weekday()) and 
+             course_name.start_time <= upload_time.time() <= course_name.end_time):
                valid_codes.append(upload)
    return valid_codes
