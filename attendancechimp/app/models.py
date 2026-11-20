@@ -129,7 +129,7 @@ def getUploadsForCourse(course):
    Input= unique course code. Output= List of QRCodeUpload objects valid for that course.
    """
 
-   course_name=Course.objects.filter(name=course_code).first()
+   course_name=Course.objects.filter(name=course).first()
    if course_name is None:
       course_name = Course.objects.filter(course_id=course).first() # try both
    if course_name is None:
